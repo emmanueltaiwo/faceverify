@@ -27,6 +27,9 @@ export const STEP_ORDER: Step[] = [
 
 export const CONFIRM_MS = 500;
 
+/** Consecutive failed frames before dropping a pending confirmation (reduces mobile jitter). */
+const CONFIRM_MISS_FRAMES = 8;
+
 export type BlinkPhase =
   | 'await_open'
   | 'await_closed'
@@ -39,6 +42,7 @@ export type VerificationState = {
   status: VerificationStatus;
   pendingSince: number | null;
   blinkPhase: BlinkPhase;
+  confirmMissStreak: number;
 };
 
 export function initialVerificationState(): VerificationState {
@@ -48,6 +52,7 @@ export function initialVerificationState(): VerificationState {
     status: 'idle',
     pendingSince: null,
     blinkPhase: 'await_open',
+    confirmMissStreak: 0,
   };
 }
 
@@ -117,6 +122,7 @@ export function reduceVerification(
       status: prev.status === 'idle' ? 'idle' : 'detecting',
       pendingSince: null,
       blinkPhase: prev.currentStep === 'BLINK' ? 'await_open' : prev.blinkPhase,
+      confirmMissStreak: 0,
     };
   }
 
@@ -137,20 +143,42 @@ export function reduceVerification(
   });
 
   if (!met) {
+    const streak = prev.confirmMissStreak + 1;
+    if (streak < CONFIRM_MISS_FRAMES && prev.pendingSince !== null) {
+      return {
+        ...prev,
+        status,
+        confirmMissStreak: streak,
+        blinkPhase,
+      };
+    }
     return {
       ...prev,
       status,
       pendingSince: null,
       blinkPhase,
+      confirmMissStreak: 0,
     };
   }
 
   const pending = prev.pendingSince;
   if (pending === null) {
-    return { ...prev, status, pendingSince: nowMs, blinkPhase };
+    return {
+      ...prev,
+      status,
+      pendingSince: nowMs,
+      blinkPhase,
+      confirmMissStreak: 0,
+    };
   }
   if (nowMs - pending < CONFIRM_MS) {
-    return { ...prev, status, pendingSince: pending, blinkPhase };
+    return {
+      ...prev,
+      status,
+      pendingSince: pending,
+      blinkPhase,
+      confirmMissStreak: 0,
+    };
   }
 
   const completed = [...prev.completedSteps, prev.currentStep];
@@ -165,6 +193,7 @@ export function reduceVerification(
       status: 'success',
       pendingSince: null,
       blinkPhase: 'await_open',
+      confirmMissStreak: 0,
     };
   }
 
@@ -175,6 +204,7 @@ export function reduceVerification(
     status,
     pendingSince: null,
     blinkPhase: nextStep === 'BLINK' ? 'await_open' : 'await_open',
+    confirmMissStreak: 0,
   };
 }
 
