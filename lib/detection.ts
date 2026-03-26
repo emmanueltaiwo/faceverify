@@ -92,7 +92,7 @@ export function mouthBlocksPoseSteps(landmarks: NormalizedLandmark[]): boolean {
 }
 
 const EAR_OPEN = 0.16;
-const EAR_CLOSED = 0.12;
+const EAR_CLOSED = 0.13;
 
 export function detectBlink(landmarks: NormalizedLandmark[]): boolean {
   const ear = eyeAspectRatio(landmarks);

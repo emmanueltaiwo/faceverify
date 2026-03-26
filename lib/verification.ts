@@ -28,7 +28,22 @@ export const STEP_ORDER: Step[] = [
 
 export const CONFIRM_MS = 500;
 
+const CONFIRM_MS_BLINK = 280;
+
 const CONFIRM_MISS_FRAMES = 8;
+
+const CONFIRM_MISS_FRAMES_BLINK_DONE = 14;
+
+function confirmMsForStep(step: Step): number {
+  return step === 'BLINK' ? CONFIRM_MS_BLINK : CONFIRM_MS;
+}
+
+function maxMissFrames(step: Step, blinkPhase: BlinkPhase): number {
+  if (step === 'BLINK' && blinkPhase === 'blink_done') {
+    return CONFIRM_MISS_FRAMES_BLINK_DONE;
+  }
+  return CONFIRM_MISS_FRAMES;
+}
 
 export type BlinkPhase =
   | 'await_open'
@@ -145,7 +160,8 @@ export function reduceVerification(
 
   if (!met) {
     const streak = prev.confirmMissStreak + 1;
-    if (streak < CONFIRM_MISS_FRAMES && prev.pendingSince !== null) {
+    const missCap = maxMissFrames(prev.currentStep, blinkPhase);
+    if (streak < missCap && prev.pendingSince !== null) {
       return {
         ...prev,
         status,
@@ -172,7 +188,7 @@ export function reduceVerification(
       confirmMissStreak: 0,
     };
   }
-  if (nowMs - pending < CONFIRM_MS) {
+  if (nowMs - pending < confirmMsForStep(prev.currentStep)) {
     return {
       ...prev,
       status,
