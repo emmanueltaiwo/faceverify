@@ -70,23 +70,27 @@ export function detectHeadTurn(landmarks: NormalizedLandmark[]): HeadTurn {
   const eyeMidX = (leftEye.x + rightEye.x) / 2;
   const eyeWidth = Math.abs(rightEye.x - leftEye.x) + 1e-6;
   const offset = (nose.x - eyeMidX) / eyeWidth;
-  // Wider “center” band — phone selfie cams / arm’s-length hold often read slightly off-axis.
+
   const t = 0.15;
-  // Labels match egocentric “your left/right” vs the mirrored preview (CSS flip).
+
   if (offset < -t) return 'RIGHT';
   if (offset > t) return 'LEFT';
   return 'CENTER';
 }
 
-export function detectMouthOpen(landmarks: NormalizedLandmark[]): boolean {
+export function mouthOpenRatio(landmarks: NormalizedLandmark[]): number {
   const mouth = dist2d(landmarks[L.upperLip], landmarks[L.lowerLip]);
-  const eyeW = interEyeDistance(landmarks);
-  const ratio = mouth / (eyeW + 1e-6);
-  // Slightly higher bar so resting lips on mobile don’t read as “open”.
-  return ratio > 0.26;
+  return mouth / (interEyeDistance(landmarks) + 1e-6);
 }
 
-// Mobile front cameras often yield lower EAR; keep a gap so blink still has open vs closed.
+export function detectMouthOpen(landmarks: NormalizedLandmark[]): boolean {
+  return mouthOpenRatio(landmarks) > 0.2;
+}
+
+export function mouthBlocksPoseSteps(landmarks: NormalizedLandmark[]): boolean {
+  return mouthOpenRatio(landmarks) > 0.26;
+}
+
 const EAR_OPEN = 0.16;
 const EAR_CLOSED = 0.12;
 

@@ -2,6 +2,7 @@ import type { NormalizedLandmark } from '@mediapipe/tasks-vision';
 import {
   detectHeadTurn,
   detectMouthOpen,
+  mouthBlocksPoseSteps,
   detectBlink,
   eyesLikelyOpen,
 } from './detection';
@@ -27,7 +28,6 @@ export const STEP_ORDER: Step[] = [
 
 export const CONFIRM_MS = 500;
 
-/** Consecutive failed frames before dropping a pending confirmation (reduces mobile jitter). */
 const CONFIRM_MISS_FRAMES = 8;
 
 export type BlinkPhase =
@@ -90,14 +90,15 @@ function stepConditionMet(
 ): boolean {
   const head = detectHeadTurn(landmarks);
   const mouthOpen = detectMouthOpen(landmarks);
+  const poseMouthOk = !mouthBlocksPoseSteps(landmarks);
 
   switch (step) {
     case 'LOOK_STRAIGHT':
-      return head === 'CENTER' && !mouthOpen && eyesLikelyOpen(landmarks);
+      return head === 'CENTER' && poseMouthOk && eyesLikelyOpen(landmarks);
     case 'TURN_LEFT':
-      return head === 'LEFT' && !mouthOpen;
+      return head === 'LEFT' && poseMouthOk;
     case 'TURN_RIGHT':
-      return head === 'RIGHT' && !mouthOpen;
+      return head === 'RIGHT' && poseMouthOk;
     case 'OPEN_MOUTH':
       return mouthOpen;
     case 'BLINK':
