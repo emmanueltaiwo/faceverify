@@ -68,3 +68,4 @@ Thinking about contributing? That's awesome! Whether it's a bug fix, a new featu
 ## Author Info
 *   **LinkedIn**: [emmanueloluwafunso](https://www.linkedin.com/in/emmanueloluwafunso)
 *   **X (formerly Twitter)**: [@ez0xai](https://x.com/ez0xai)
+*   **Portfolio**: [emmanueltaiwo.dev](https://emmanueltaiwo.dev)
