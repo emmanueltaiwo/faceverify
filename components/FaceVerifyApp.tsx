@@ -144,7 +144,12 @@ export default function FaceVerifyApp() {
     [processFrame],
   );
 
-  useFaceDetection(videoRef, landmarker, onFrame, 12);
+  const detectionFps = useMemo(
+    () => (state.currentStep === 'BLINK' ? 22 : 12),
+    [state.currentStep],
+  );
+
+  useFaceDetection(videoRef, landmarker, onFrame, detectionFps);
 
   const engineReady = cameraReady && !!landmarker && !modelError;
 
@@ -284,7 +289,7 @@ export default function FaceVerifyApp() {
           {/* Bottom HUD bar */}
           <div className='absolute bottom-0 left-0 right-0 z-10 flex items-center justify-between bg-linear-to-t from-black/80 to-transparent px-3 py-2'>
             <span className='font-mono text-[8px] uppercase tracking-widest text-cyan-600/50'>
-              LIVE · 12FPS
+              LIVE · {detectionFps}FPS
             </span>
             <AnimatePresence>
               {showLowLight ? (

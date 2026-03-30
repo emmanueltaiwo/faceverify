@@ -28,7 +28,7 @@ export const STEP_ORDER: Step[] = [
 
 export const CONFIRM_MS = 500;
 
-const CONFIRM_MS_BLINK = 280;
+const CONFIRM_MS_BLINK = 200;
 
 const CONFIRM_MISS_FRAMES = 8;
 
