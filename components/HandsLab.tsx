@@ -137,6 +137,16 @@ function panelDimsFor(id: PanelId, vw: number) {
   }
 }
 
+function panelDragVisual(pid: PanelId, dragging: PanelId | null) {
+  const z = dragging === pid ? 'z-[45]' : 'z-30';
+  if (dragging !== pid) return z;
+  const fx =
+    pid === 'reactor'
+      ? 'scale-[1.02] border-orange-400/70 ring-2 ring-orange-400/60 shadow-[0_0_56px_rgba(249,115,22,0.38)]'
+      : 'scale-[1.02] border-cyan-400/65 ring-2 ring-cyan-400/75 shadow-[0_0_52px_rgba(34,211,238,0.42)]';
+  return `${z} ${fx}`;
+}
+
 function HudBracket({ className = '' }: { className?: string }) {
   return (
     <>
@@ -220,8 +230,13 @@ export default function HandsLab() {
   } | null>(null);
   const playgroundRef = useRef<HTMLDivElement>(null);
 
+  const [draggingPanelId, setDraggingPanelId] = useState<PanelId | null>(null);
+
   useEffect(() => {
-    if (!handControlEnabled) dragRef.current = null;
+    if (!handControlEnabled) {
+      dragRef.current = null;
+      queueMicrotask(() => setDraggingPanelId(null));
+    }
   }, [handControlEnabled]);
 
   const setPosFor = useCallback((id: PanelId, left: number, top: number) => {
@@ -259,11 +274,13 @@ export default function HandsLab() {
     if (!id || !(id in PANEL)) return;
     const r = node.getBoundingClientRect();
     dragRef.current = { offX: p.x - r.left, offY: p.y - r.top, id };
+    setDraggingPanelId(id);
   }, []);
 
   const onPinchUp = useCallback((p: Point2D) => {
     const wasDragging = dragRef.current !== null;
     dragRef.current = null;
+    setDraggingPanelId(null);
     if (wasDragging) return;
 
     const el = document.elementFromPoint(p.x, p.y);
@@ -485,7 +502,9 @@ export default function HandsLab() {
         {/* Draggable — tactical */}
         <motion.div
           data-hand-draggable='tactical'
-          className='pointer-events-auto absolute z-30 flex max-w-[calc(100vw-1.5rem)] flex-col rounded-lg border border-cyan-500/35 bg-black/55 px-3 py-2.5 shadow-[0_0_40px_rgba(6,182,212,0.12)] backdrop-blur-md sm:px-4 sm:py-3'
+          data-hand-dragging={draggingPanelId === 'tactical' ? 'true' : undefined}
+          aria-grabbed={draggingPanelId === 'tactical'}
+          className={`pointer-events-auto absolute flex max-w-[calc(100vw-1.5rem)] flex-col rounded-lg border border-cyan-500/35 bg-black/55 px-3 py-2.5 shadow-[0_0_40px_rgba(6,182,212,0.12)] backdrop-blur-md transition-[transform,box-shadow,ring] duration-150 sm:px-4 sm:py-3 ${panelDragVisual('tactical', draggingPanelId)}`}
           style={{
             left: posTactical.left,
             top: posTactical.top,
@@ -521,7 +540,9 @@ export default function HandsLab() {
         {/* Draggable — arc reactor */}
         <motion.div
           data-hand-draggable='reactor'
-          className='pointer-events-auto absolute z-30 flex max-w-[calc(100vw-1.5rem)] flex-col items-center justify-center rounded-full border border-orange-500/40 bg-black/50 p-3 shadow-[0_0_50px_rgba(249,115,22,0.15)] backdrop-blur-md sm:p-4'
+          data-hand-dragging={draggingPanelId === 'reactor' ? 'true' : undefined}
+          aria-grabbed={draggingPanelId === 'reactor'}
+          className={`pointer-events-auto absolute flex max-w-[calc(100vw-1.5rem)] flex-col items-center justify-center rounded-full border border-orange-500/40 bg-black/50 p-3 shadow-[0_0_50px_rgba(249,115,22,0.15)] backdrop-blur-md transition-[transform,box-shadow,ring] duration-150 sm:p-4 ${panelDragVisual('reactor', draggingPanelId)}`}
           style={{
             left: posReactor.left,
             top: posReactor.top,
@@ -551,7 +572,9 @@ export default function HandsLab() {
         {/* Draggable — flight chips */}
         <motion.div
           data-hand-draggable='targets'
-          className='pointer-events-auto absolute z-30 max-w-[calc(100vw-1.5rem)] rounded-lg border border-cyan-500/30 bg-black/50 px-3 py-2.5 backdrop-blur-md sm:px-4 sm:py-3'
+          data-hand-dragging={draggingPanelId === 'targets' ? 'true' : undefined}
+          aria-grabbed={draggingPanelId === 'targets'}
+          className={`pointer-events-auto absolute max-w-[calc(100vw-1.5rem)] rounded-lg border border-cyan-500/30 bg-black/50 px-3 py-2.5 backdrop-blur-md transition-[transform,box-shadow,ring] duration-150 sm:px-4 sm:py-3 ${panelDragVisual('targets', draggingPanelId)}`}
           style={{
             left: posTargets.left,
             top: posTargets.top,
@@ -591,7 +614,9 @@ export default function HandsLab() {
         {/* Bottom deck — Reactor output / sliders (draggable) */}
         <motion.div
           data-hand-draggable='deck'
-          className='pointer-events-auto absolute z-30 flex w-[min(92vw,520px)] max-w-[calc(100vw-1.5rem)] flex-col gap-3 rounded-xl border border-cyan-500/25 bg-black/60 px-4 py-3 backdrop-blur-lg sm:gap-4 sm:px-5 sm:py-4'
+          data-hand-dragging={draggingPanelId === 'deck' ? 'true' : undefined}
+          aria-grabbed={draggingPanelId === 'deck'}
+          className={`pointer-events-auto absolute flex w-[min(92vw,520px)] max-w-[calc(100vw-1.5rem)] flex-col gap-3 rounded-xl border border-cyan-500/25 bg-black/60 px-4 py-3 backdrop-blur-lg transition-[transform,box-shadow,ring] duration-150 sm:gap-4 sm:px-5 sm:py-4 ${panelDragVisual('deck', draggingPanelId)}`}
           style={{
             left: posDeck.left,
             top: posDeck.top,
