@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import type { NormalizedLandmark } from '@mediapipe/tasks-vision';
 import { motion, AnimatePresence } from 'motion/react';
 import CameraFeed from '@/components/CameraFeed';
@@ -228,6 +229,12 @@ export default function FaceVerifyApp() {
             <p className='font-mono text-[8px] uppercase tracking-[0.2em] text-cyan-600/70'>
               Neural Auth System · v2.0
             </p>
+            <Link
+              href='/jarvis'
+              className='mt-2 inline-block font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-500/50 transition hover:text-cyan-300'
+            >
+              J.A.R.V.I.S. HUD →
+            </Link>
           </div>
         </div>
 
