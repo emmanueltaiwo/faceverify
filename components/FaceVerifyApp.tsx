@@ -229,12 +229,20 @@ export default function FaceVerifyApp() {
             <p className='font-mono text-[8px] uppercase tracking-[0.2em] text-cyan-600/70'>
               Neural Auth System · v2.0
             </p>
-            <Link
-              href='/jarvis'
-              className='mt-2 inline-block font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-500/50 transition hover:text-cyan-300'
-            >
-              J.A.R.V.I.S. HUD →
-            </Link>
+            <div className='mt-2 flex flex-col gap-1'>
+              <Link
+                href='/jarvis'
+                className='inline-block font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-500/50 transition hover:text-cyan-300'
+              >
+                J.A.R.V.I.S. HUD →
+              </Link>
+              <Link
+                href='/game'
+                className='inline-block font-mono text-[9px] uppercase tracking-[0.2em] text-orange-500/50 transition hover:text-orange-300'
+              >
+                Hand Runner →
+              </Link>
+            </div>
           </div>
         </div>
 
